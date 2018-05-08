@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="GetWorkItems.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="baseAddress" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://pedro-ferreira.visualstudio.com</Value>
+    </Setting>
+    <Setting Name="token" Type="System.String" Scope="User">
+      <Value Profile="(Default)">abgyke5bkwodbfqw4gxcsv4bbl2k6sxqbfz6eihtxz2xwsuqcrka</Value>
+    </Setting>
+    <Setting Name="sqlConnectionString" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+  </Settings>
+</SettingsFile>
