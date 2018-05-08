@@ -14,7 +14,7 @@ namespace GetWorkItems
         static void Main(string[] args)
         {
             var a = new WorkItemsHandler();
-            a.Get();
+            a.GetWorkItems();
         }
 
         //static int[] GetWorkItemsIds()

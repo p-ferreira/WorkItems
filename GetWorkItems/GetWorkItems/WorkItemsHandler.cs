@@ -35,32 +35,32 @@ namespace GetWorkItems
             return client;
         }
 
-        public List<int> GetWorkItemsIds()
+        List<int> GetWorkItemsIds()
         {
             List<int> ids = new List<int>();
 
             try
             {
-                JObject workItemsResponse;
+                JObject apiResponse;
 
                 using (var client = ConfiguredHttpClient())
                 {
                     var query = "Select [System.Id] From WorkItems";
-                    var content = new StringContent("{ \"query\": \"" + query + "\" }",
+                    var requestBody = new StringContent("{ \"query\": \"" + query + "\" }",
                                                     Encoding.UTF8,
                                                     "application/json");
 
-                    using (HttpResponseMessage response = client.PostAsync("_apis/wit/wiql?api-version=4.1", content).Result)
+                    using (HttpResponseMessage response = client.PostAsync("_apis/wit/wiql?api-version=4.1", requestBody).Result)
                     {
                         response.EnsureSuccessStatusCode();
                         string responseBody = response.Content.ReadAsStringAsync().Result;
-                        workItemsResponse = JObject.Parse(responseBody);
+                        apiResponse = JObject.Parse(responseBody);
                     }
                 }
 
-                JArray workingItems = (JArray)workItemsResponse["workItems"];
+                JArray workItems = (JArray)apiResponse["workItems"];
 
-                foreach (dynamic workItem in workingItems)                
+                foreach (dynamic workItem in workItems)                
                     ids.Add((int)workItem.id);
 
                 return ids;
@@ -73,23 +73,43 @@ namespace GetWorkItems
         }
 
 
-        public void Get()
+        public void GetWorkItems()
         {
+            List<int> ids = GetWorkItemsIds();
+
+            JObject apiResponse = null;
+
             using (var client = ConfiguredHttpClient())
             {
-                string fields = "fields=System.Id,System.Title,System.WorkItemType,System.IterationPath,System.AreaPath,System.State";
-
-                HttpResponseMessage response = client.GetAsync("_apis/wit/workitems?ids=1&" + fields + "&api-version=4.1").Result;
-
-                //check to see if we have a succesfull respond
-                if (response.IsSuccessStatusCode)
+                string[] fields = new string[]
                 {
-                    //set the viewmodel from the content in the response
-                    //var viewModel = response.Content.ReadAsAsync<object>().Result;
+                    "System.Id",
+                    "System.Title",
+                    "System.WorkItemType",
+                    "System.IterationPath",
+                    "System.AreaPath",
+                    "System.State"
+                };
 
-                    var value = response.Content.ReadAsStringAsync().Result;
-                }
+                string requestURI = "_apis/wit/workitems?ids=" + string.Join(",", ids) +
+                                    "&fields=" + string.Join(",", fields) +
+                                    "&api-version=4.1";
+
+                using (HttpResponseMessage response = client.GetAsync(requestURI).Result)
+                {
+                    response.EnsureSuccessStatusCode();
+                    string responseBody = response.Content.ReadAsStringAsync().Result;
+                    apiResponse = JObject.Parse(responseBody);
+                }                                
             }
+
+            JArray workItems = (JArray)apiResponse["value"];
+
+            foreach (dynamic workItem in workItems)
+            {
+                string a = workItem.fields.ToString();
+            }
+                
         }
     }
 }
