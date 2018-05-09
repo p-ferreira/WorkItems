@@ -30,8 +30,7 @@ namespace GetWorkItems
 
             Wiql wiql = new Wiql()
             {
-                Query = @" Select [Id]
-                       From WorkItems"
+                Query = @" Select [Id] From WorkItems"
             };
 
             using (WorkItemTrackingHttpClient workItemTrackingHttpClient = new WorkItemTrackingHttpClient(uri, credentials))
