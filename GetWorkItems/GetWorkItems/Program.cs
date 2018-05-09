@@ -13,8 +13,15 @@ namespace GetWorkItems
     {
         static void Main(string[] args)
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
             var a = new WorkItemsHandler();
-            a.Get();
+            a.GetWorkItems();
+
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+            Console.WriteLine(elapsedMs);
+            Console.ReadKey();
         }
 
         //static int[] GetWorkItemsIds()

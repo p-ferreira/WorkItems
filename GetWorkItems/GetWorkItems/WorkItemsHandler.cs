@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+using Microsoft.VisualStudio.Services.Common;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -18,77 +21,50 @@ namespace GetWorkItems
 
         }
 
-
-        HttpClient ConfiguredHttpClient()
+        public List<WorkItem> GetWorkItems()
         {
-            HttpClient client = new HttpClient
+            Uri uri = new Uri(Properties.Settings.Default.baseAddress);
+            string token = Properties.Settings.Default.token;            
+
+            VssBasicCredential credentials = new VssBasicCredential("", token);
+
+            Wiql wiql = new Wiql()
             {
-                BaseAddress = new Uri(Properties.Settings.Default.baseAddress)
+                Query = @" Select [Id]
+                       From WorkItems"
             };
 
-            string token = $"{ string.Empty }:{ Properties.Settings.Default.token}";
-            string encodedToken = Convert.ToBase64String(Encoding.ASCII.GetBytes(token));
-
-            client.DefaultRequestHeaders
-                  .Authorization = new AuthenticationHeaderValue("Basic", encodedToken);
-
-            return client;
-        }
-
-        public List<int> GetWorkItemsIds()
-        {
-            List<int> ids = new List<int>();
-
-            try
+            using (WorkItemTrackingHttpClient workItemTrackingHttpClient = new WorkItemTrackingHttpClient(uri, credentials))
             {
-                JObject workItemsResponse;
+                WorkItemQueryResult workItemQueryResult = workItemTrackingHttpClient.QueryByWiqlAsync(wiql).Result;
 
-                using (var client = ConfiguredHttpClient())
+                if (workItemQueryResult.WorkItems.Count() != 0)
                 {
-                    var query = "Select [System.Id] From WorkItems";
-                    var content = new StringContent("{ \"query\": \"" + query + "\" }",
-                                                    Encoding.UTF8,
-                                                    "application/json");
+                    List<int> ids = new List<int>();
 
-                    using (HttpResponseMessage response = client.PostAsync("_apis/wit/wiql?api-version=4.1", content).Result)
+                    foreach (var item in workItemQueryResult.WorkItems)
+                        ids.Add(item.Id);
+
+
+                    string[] fields = new string[6]
                     {
-                        response.EnsureSuccessStatusCode();
-                        string responseBody = response.Content.ReadAsStringAsync().Result;
-                        workItemsResponse = JObject.Parse(responseBody);
-                    }
+                        "System.Id",
+                        "System.Title",
+                        "System.WorkItemType",
+                        "System.IterationPath",
+                        "System.AreaPath",
+                        "System.State"
+                    };                    
+
+                    return workItemTrackingHttpClient.GetWorkItemsAsync(ids,
+                                                                        fields,
+                                                                        workItemQueryResult.AsOf)
+                                                     .Result;
+
+                    
                 }
 
-                JArray workingItems = (JArray)workItemsResponse["workItems"];
-
-                foreach (dynamic workItem in workingItems)                
-                    ids.Add((int)workItem.id);
-
-                return ids;
-
-            }
-            catch (Exception ex)
-            {
                 return null;
-            }
-        }
-
-
-        public void Get()
-        {
-            using (var client = ConfiguredHttpClient())
-            {
-                string fields = "fields=System.Id,System.Title,System.WorkItemType,System.IterationPath,System.AreaPath,System.State";
-
-                HttpResponseMessage response = client.GetAsync("_apis/wit/workitems?ids=1&" + fields + "&api-version=4.1").Result;
-
-                //check to see if we have a succesfull respond
-                if (response.IsSuccessStatusCode)
-                {
-                    //set the viewmodel from the content in the response
-                    //var viewModel = response.Content.ReadAsAsync<object>().Result;
-
-                    var value = response.Content.ReadAsStringAsync().Result;
-                }
             }
         }
     }
