@@ -68,48 +68,53 @@ namespace GetWorkItems
             }
             catch (Exception ex)
             {
-                return null;
+                throw ex;
             }
         }
 
 
-        public void GetWorkItems()
+        public List<JObject> GetWorkItems()
         {
-            List<int> ids = GetWorkItemsIds();
-
-            JObject apiResponse = null;
-
-            using (var client = ConfiguredHttpClient())
+            try
             {
-                string[] fields = new string[]
-                {
-                    "System.Id",
-                    "System.Title",
-                    "System.WorkItemType",
-                    "System.IterationPath",
-                    "System.AreaPath",
-                    "System.State"
-                };
+                List<JObject> workItems = new List<JObject>();
 
-                string requestURI = "_apis/wit/workitems?ids=" + string.Join(",", ids) +
-                                    "&fields=" + string.Join(",", fields) +
-                                    "&api-version=4.1";
+                List<int> ids = GetWorkItemsIds();
+                JObject apiResponse = null;
 
-                using (HttpResponseMessage response = client.GetAsync(requestURI).Result)
+                using (var client = ConfiguredHttpClient())
                 {
-                    response.EnsureSuccessStatusCode();
-                    string responseBody = response.Content.ReadAsStringAsync().Result;
-                    apiResponse = JObject.Parse(responseBody);
-                }                                
+                    string[] fields = new string[]
+                    {
+                        "System.Id",
+                        "System.Title",
+                        "System.WorkItemType",
+                        "System.IterationPath",
+                        "System.AreaPath",
+                        "System.State"
+                    };
+
+                    string requestURI = "_apis/wit/workitems?ids=" + string.Join(",", ids) +
+                                        "&fields=" + string.Join(",", fields) +
+                                        "&api-version=4.1";
+
+                    using (HttpResponseMessage response = client.GetAsync(requestURI).Result)
+                    {
+                        response.EnsureSuccessStatusCode();
+                        string responseBody = response.Content.ReadAsStringAsync().Result;
+                        apiResponse = JObject.Parse(responseBody);
+                    }
+                }
+
+                foreach (dynamic workItem in (JArray)apiResponse["value"])                
+                    workItems.Add((JObject)workItem.fields);
+
+                return workItems;
             }
-
-            JArray workItems = (JArray)apiResponse["value"];
-
-            foreach (dynamic workItem in workItems)
+            catch (Exception ex)
             {
-                string a = workItem.fields.ToString();
-            }
-                
+                throw ex;
+            }                
         }
     }
 }
