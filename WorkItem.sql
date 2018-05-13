@@ -1,20 +1,21 @@
 
-CREATE DATABASE GenericDataBase
+CREATE DATABASE GenericDb
 GO
 
-USE GenericDataBase
+USE GenericDb
 GO
 
 
 CREATE TABLE WorkItems
 (	
+	uId bigint Primary Key Identity not null,
 	ID int,
 	Title VARCHAR(200), /*ToDo: Verificar tamanho máximo permitido pela ms*/
 	WorkItemType VARCHAR(200),
 	IterationPath VARCHAR(200),
 	AreaPath VARCHAR (200),
 	State VARCHAR (200),	
-	uId UNIQUEIDENTIFIER
+	Guid UNIQUEIDENTIFIER
 )
 
 

@@ -49,7 +49,9 @@ namespace GetWorkItems.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Server=wi-sample.database.windows.net;Database=GenericDb;User ID=p-ferreira@wi-sa" +
+            "mple.database.windows.net;Password=#pedrZure;Trusted_Connection=False;Encrypt=Tr" +
+            "ue;")]
         public string sqlConnectionString {
             get {
                 return ((string)(this["sqlConnectionString"]));
